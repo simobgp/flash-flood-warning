@@ -1,171 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-
-<title>Flash Flood Warning Near Me | Live US Alerts Map & Emergency Safety Tracker</title>
-<meta name="description" content="Official live Flash Flood Warning tracker. Real-time NWS alerts, interactive Doppler radar maps, and state-specific safety guides for Arizona, Texas, Florida & more." />
-<link rel="canonical" href="https://simobgp.github.io/flash-flood-warning/" />
-
-<link rel="preconnect" href="https://unpkg.com" />
-<link rel="preconnect" href="https://api.weather.gov" />
-<meta name="robots" content="index,follow,max-image-preview:large" />
-<meta name="theme-color" content="#b91c1c" />
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-<style>
-    :root{
-        --danger:#dc2626; --warning:#f59e0b; --accent:#2563eb;
-        --dark:#0f172a; --slate:#f8fafc; --white:#ffffff; --radius:16px;
-    }
-    *{box-sizing:border-box; margin:0; padding:0;}
-    body{font-family: system-ui, -apple-system, sans-serif; background:var(--slate); color:var(--dark); line-height:1.6; scroll-behavior: smooth;}
-    .container{max-width:1200px; margin:0 auto; padding:0 20px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVE Flash Flood Warning Tracker | US Radar & Real-Time Map</title>
+    <meta name="description" content="Track live Flash Flood Warnings with our interactive US radar map. Real-time NWS alerts, state-by-state flood counts, and emergency safety guides. Update every 60 seconds.">
     
-    /* Sticky Navigation */
-    nav{background:var(--white); border-bottom:1px solid #e2e8f0; padding:15px 0; position:sticky; top:0; z-index:2000; box-shadow:0 2px 10px rgba(0,0,0,0.05);}
-    .nav-flex{display:flex; justify-content:space-between; align-items:center;}
-    .logo{font-weight:900; color:var(--danger); text-decoration:none; font-size:1.4rem; letter-spacing:-1px;}
-    .nav-links a{text-decoration:none; color:var(--dark); font-weight:600; font-size:0.9rem; margin-left:20px;}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --danger: #e11d48; --warning: #f59e0b; --dark: #0f172a; --live: #22c55e; --slate: #f1f5f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--slate); color: var(--dark); }
 
-    /* Emergency Alert Bar */
-    #alert-ticker{background:var(--danger); color:#fff; padding:12px; text-align:center; font-weight:bold; display:none; animation:pulse 2s infinite;}
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.8;} }
+        /* Dashboard Header */
+        .top-nav { background: #fff; border-bottom: 2px solid #e2e8f0; padding: 10px 0; sticky; top: 0; z-index: 1000; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .logo { font-weight: 900; color: var(--danger); font-size: 1.5rem; text-decoration: none; }
+        
+        /* Live Command Center */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .stat-number { display: block; font-size: 2.5rem; font-weight: 800; color: var(--danger); }
+        .stat-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #64748b; }
+        .live-dot { height: 10px; width: 10px; background: var(--live); border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-    /* Hero Section */
-    .hero{background:var(--dark); color:#fff; padding:70px 0 110px; text-align:center;}
-    .hero h1{font-size: clamp(2.2rem, 6vw, 3.5rem); margin-bottom:1rem; line-height:1.1;}
-    .live-stats{display:inline-flex; gap:20px; background:rgba(255,255,255,0.1); padding:12px 30px; border-radius:50px; margin-bottom:25px; border:1px solid rgba(255,255,255,0.2);}
-    .stat-item{font-weight:bold; font-size:0.95rem;}
+        /* Map & Controls */
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+        #ffw-map { height: 550px; background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; z-index: 1; }
+        .sidebar { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; height: 550px; display: flex; flex-direction: column; }
+        .alert-item { background: var(--slate); padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid var(--danger); font-size: 0.85rem; }
 
-    /* Interactive Search & Map */
-    .map-container{margin-top:-70px; margin-bottom:50px; position:relative; z-index:100;}
-    .search-card{background:#fff; padding:20px; border-radius:var(--radius); box-shadow:0 20px 40px rgba(0,0,0,0.1); border:1px solid #e2e8f0;}
-    .search-flex{display:flex; gap:10px; margin-bottom:20px;}
-    .search-flex input{flex:1; padding:14px; border:1px solid #cbd5e1; border-radius:10px; font-size:1rem; outline:none;}
-    .btn-search{background:var(--accent); color:#fff; border:none; padding:14px 28px; border-radius:10px; font-weight:bold; cursor:pointer; transition:0.3s;}
-    .btn-search:hover{background:#1d4ed8;}
-    #ffw-map{height:600px; width:100%; border-radius:12px; z-index:1;}
+        /* Search & SEO Content */
+        .search-bar { background: var(--dark); padding: 40px 0; color: #fff; text-align: center; }
+        .search-box { background: #fff; padding: 8px; border-radius: 50px; display: flex; max-width: 500px; margin: 20px auto; border: 4px solid rgba(255,255,255,0.2); }
+        .search-box input { flex: 1; border: none; padding-left: 20px; border-radius: 50px; outline: none; font-size: 1rem; }
+        .search-box button { background: var(--danger); color: #fff; border: none; padding: 10px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-    /* Content Layout */
-    .section-title{margin:50px 0 25px; border-left:6px solid var(--danger); padding-left:15px; font-size:1.8rem;}
-    .info-grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:25px;}
-    .card{background:#fff; padding:30px; border-radius:var(--radius); border:1px solid #e2e8f0; transition:0.3s;}
-    .card:hover{transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.05);}
-    .card h3{color:var(--danger); margin-bottom:15px;}
+        .seo-content { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .faq-item { background: #fff; padding: 20px; border-radius: 12px; }
 
-    /* State Navigation */
-    .state-hub{background:#fff; padding:40px; border-radius:var(--radius); margin:40px 0;}
-    .state-grid{display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px;}
-    .state-btn{background:var(--slate); padding:12px; border-radius:8px; text-decoration:none; color:var(--dark); font-weight:600; text-align:center; font-size:0.85rem;}
-    .state-btn:hover{background:var(--danger); color:#fff;}
+        /* Ad Slots */
+        .ad-slot { background: #e2e8f0; height: 90px; margin: 20px 0; display: flex; align-items: center; justify-content: center; color: #94a3b8; border: 1px dashed #cbd5e1; border-radius: 8px; }
 
-    /* Footer */
-    footer{background:var(--dark); color:#94a3b8; padding:80px 0 40px;}
-    footer h4{color:#fff; margin-bottom:20px;}
-    footer a{color:#cbd5e1; text-decoration:none; display:block; margin-bottom:10px; font-size:0.9rem;}
-    .footer-bottom{border-top:1px solid #334155; margin-top:50px; padding-top:25px; text-align:center; font-size:0.8rem;}
-
-    @media (max-width:768px){ .search-flex{flex-direction:column;} #ffw-map{height:400px;} .nav-links{display:none;} }
-</style>
+        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } .faq-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
-<div id="alert-ticker">⚠️ CRITICAL: Active Flash Flood Warning in the US. Seek Higher Ground.</div>
-
-<nav>
-    <div class="container nav-flex">
+<div class="top-nav">
+    <div class="flex-row">
         <a href="#" class="logo">FLASH FLOOD TRACKER</a>
-        <div class="nav-links">
-            <a href="#map">Live Map</a>
-            <a href="#safety">Safety Guide</a>
-            <a href="#states">States</a>
-            <a href="#privacy">Privacy</a>
+        <div style="font-size: 0.8rem; font-weight: bold; color: var(--live);">
+            <span class="live-dot"></span> LIVE NWS API CONNECTION
         </div>
     </div>
-</nav>
+</div>
 
-<header class="hero">
+<section class="search-bar">
     <div class="container">
-        <h1>Flash Flood Warning Tracker Today</h1>
-        <div class="live-stats">
-            <div class="stat-item" style="color:#ff8a8a">🔴 <span id="warn-count">0</span> Warnings</div>
-            <div class="stat-item" style="color:#ffca8a">🟠 <span id="watch-count">0</span> Watches</div>
-        </div>
-        <p>Providing real-time NWS emergency data and interactive doppler radar maps for immediate safety monitoring.</p>
-    </div>
-</header>
-
-<main class="container">
-    <div id="map" class="map-container">
-        <div class="search-card">
-            <div class="search-flex">
-                <input type="text" id="loc-input" placeholder="Enter US City, State, or Zip Code..." aria-label="Search Location">
-                <button class="btn-search" onclick="searchLoc()">Check My Area</button>
-            </div>
-            <div id="ffw-map"></div>
-            <p style="margin-top:10px; font-size:0.8rem; color:#64748b;">Data refreshes every 5 minutes from official NOAA/NWS satellite feeds.</p>
+        <h1>Local Flash Flood Alerts Near Me</h1>
+        <p>Real-time Doppler radar and emergency data for every US county.</p>
+        <div class="search-box">
+            <input type="text" id="locInput" placeholder="Enter City, State, or Zip...">
+            <button onclick="searchLoc()">SEARCH</button>
         </div>
     </div>
+</section>
 
-    <section id="safety" class="section">
-        <h2 class="section-title">Emergency Safety Action Plan</h2>
-        <div class="info-grid">
-            <article class="card">
-                <h3>🚗 In a Vehicle</h3>
-                <p><strong>Turn Around, Don't Drown!</strong> Never drive through water-covered roads. Just 12 inches of rushing water can sweep away most cars. If trapped, stay on the roof of the vehicle.</p>
-            </article>
-            <article class="card">
-                <h3>🏙️ In Urban Areas</h3>
-                <p>Flash floods happen faster in cities due to concrete runoff. Avoid subways, underground parking garages, and basement apartments during a Warning.</p>
-            </article>
-            <article class="card">
-                <h3>🏞️ In Rural Areas</h3>
-                <p>Be aware of distant rain. Canyons and dry washes can flood even if it isn't raining where you are. Move to a ridge or high ground immediately.</p>
-            </article>
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <span class="stat-number" id="count-warn">0</span>
+        <span class="stat-label">Active Warnings</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" id="count-states">0</span>
+        <span class="stat-label">States Affected</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" id="last-update" style="font-size: 1.5rem; margin: 15px 0;">--:--</span>
+        <span class="stat-label">Last Updated</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" id="timer" style="font-size: 1.5rem; margin: 15px 0; color: var(--warning);">00:59</span>
+        <span class="stat-label">Next Refresh</span>
+    </div>
+</div>
+
+<div class="container ad-slot">-- Top AdSense Leaderboard --</div>
+
+<main class="main-container">
+    <div id="ffw-map"></div>
+    
+    <aside class="sidebar">
+        <h3 style="margin-bottom: 15px;">Live Alert Stream</h3>
+        <div id="alert-feed" style="overflow-y: auto; flex-grow: 1;">
+            <p style="color: #64748b;">Waiting for NWS data...</p>
         </div>
-    </section>
-
-    <section id="states" class="state-hub">
-        <h2 style="margin-bottom:20px;">Browse Warnings by State</h2>
-        <div class="state-grid">
-            <a href="#" class="state-btn">Arizona</a><a href="#" class="state-btn">Texas</a><a href="#" class="state-btn">Florida</a>
-            <a href="#" class="state-btn">California</a><a href="#" class="state-btn">New York</a><a href="#" class="state-btn">New Jersey</a>
-            <a href="#" class="state-btn">Colorado</a><a href="#" class="state-btn">Alabama</a><a href="#" class="state-btn">Georgia</a>
-            <a href="#" class="state-btn">Louisiana</a><a href="#" class="state-btn">Nevada</a><a href="#" class="state-btn">Utah</a>
-        </div>
-    </section>
-
-    <section id="contact" class="card" style="margin-bottom:40px;">
-        <h2>Contact & Data Feedback</h2>
-        <p>We rely on the NWS API for all alerts. If you notice a data discrepancy or need technical support, contact our safety team at: <strong>support@simobgp.github.io</strong></p>
-    </section>
+        <div class="ad-slot" style="height: 150px; margin-bottom: 0;">-- Sidebar Ad --</div>
+    </aside>
 </main>
 
-<footer id="privacy">
-    <div class="container">
-        <div class="info-grid" style="grid-template-columns: 2fr 1fr 1fr;">
-            <div>
-                <h4>Flash Flood Tracker Portal</h4>
-                <p>A dedicated public service for real-time weather monitoring. We combine NWS Doppler radar data with interactive mapping technology.</p>
-            </div>
-            <div>
-                <h4>Resources</h4>
-                <a href="https://www.weather.gov" rel="nofollow">National Weather Service</a>
-                <a href="https://www.fema.gov" rel="nofollow">FEMA Safety</a>
-                <a href="https://www.redcross.org" rel="nofollow">American Red Cross</a>
-            </div>
-            <div>
-                <h4>Legal</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Use</a>
-                <a href="#">Contact Us</a>
-            </div>
+<section class="seo-content">
+    <h2 style="margin-bottom: 25px;">Expert Flood Safety Guide</h2>
+    <div class="faq-grid">
+        <div class="faq-item">
+            <h3>🏠 Is my house in a flood zone?</h3>
+            <p>Flash floods can occur anywhere it rains heavily. Even if you are not in a FEMA flood zone, localized "pluvial" flooding can occur in urban areas due to concrete runoff.</p>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Flash Flood Safety Center. Data synced via NOAA API. Not a government agency.</p>
+        <div class="faq-item">
+            <h3>🚗 Why "Turn Around Don't Drown"?</h3>
+            <p>Over 50% of flood-related deaths occur in vehicles. It only takes 12 inches of rushing water to carry away a small car. Never drive through water-covered roads.</p>
+        </div>
+    </div>
+    
+    <div class="ad-slot">-- Mid-Content Ad Unit --</div>
+
+    <div class="faq-grid" style="margin-top: 20px;">
+        <div class="faq-item">
+            <h3>⚠️ Flood Watch vs Warning</h3>
+            <p>A <strong>Watch</strong> means conditions are favorable for flooding—stay alert. A <strong>Warning</strong> means a flash flood is happening now or is imminent—move to higher ground immediately.</p>
+        </div>
+        <div class="faq-item">
+            <h3>🌊 Water Damage & Restoration</h3>
+            <p>After a flood, contact a professional water cleanup team immediately. Mold can begin growing within 24 to 48 hours of water exposure.</p>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="flex-row" style="flex-wrap: wrap; gap: 40px; padding: 60px 20px; background: var(--dark); color: #94a3b8; margin-top: 40px;">
+        <div style="flex: 2;">
+            <h4 style="color:#fff;">Flash Flood Tracker Portal</h4>
+            <p>Our mission is to provide 24/7 public access to critical National Weather Service data to prevent loss of life and property damage.</p>
+        </div>
+        <div style="flex: 1;">
+            <h4 style="color:#fff;">Quick Links</h4>
+            <a href="#" style="color:#fff; text-decoration:none;">Privacy Policy</a><br>
+            <a href="#" style="color:#fff; text-decoration:none;">Contact Us</a><br>
+            <a href="https://www.weather.gov" style="color:#fff; text-decoration:none;">NWS Official Site</a>
         </div>
     </div>
 </footer>
@@ -174,61 +150,81 @@
 <script>
     const map = L.map('ffw-map').setView([39.8, -98.5], 4);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    const alertGroup = L.layerGroup().addTo(map);
+    const alertLayer = L.layerGroup().addTo(map);
 
-    async function syncData() {
+    let refreshSec = 60;
+
+    async function getNWSAlerts() {
         try {
             const res = await fetch('https://api.weather.gov/alerts/active?event=Flash%20Flood%20Warning,Flash%20Flood%20Watch');
             const data = await res.json();
-            alertGroup.clearLayers();
-            let warns = 0, watches = 0;
+            
+            alertLayer.clearLayers();
+            const feed = document.getElementById('alert-feed');
+            feed.innerHTML = "";
+            
+            let warnings = 0;
+            let states = new Set();
 
-            if(data.features) {
-                data.features.forEach(f => {
-                    if(f.properties.event.includes('Warning')) warns++;
-                    else watches++;
-                });
-
+            if (data.features && data.features.length > 0) {
                 L.geoJSON(data, {
-                    style: (f) => ({
-                        color: f.properties.event.includes('Warning') ? '#dc2626' : '#f59e0b',
-                        weight: 3, fillOpacity: 0.4
-                    }),
+                    style: (f) => ({ color: f.properties.event.includes('Warning') ? '#e11d48' : '#f59e0b', weight: 4, fillOpacity: 0.5 }),
                     onEachFeature: (f, l) => {
-                        l.bindPopup(`<strong>${f.properties.event}</strong><br><small>${f.properties.headline}</small><hr>${f.properties.instruction || 'Monitor local media for updates.'}`);
+                        l.bindPopup(`<strong>${f.properties.event}</strong><br>${f.properties.areaDesc}<br><br><em>${f.properties.instruction || ""}</em>`);
                     }
-                }).addTo(alertGroup);
+                }).addTo(alertLayer);
+
+                data.features.forEach(f => {
+                    if(f.properties.event.includes('Warning')) warnings++;
+                    
+                    // Count states
+                    const area = f.properties.areaDesc;
+                    const stateCode = area.match(/([A-Z]{2})/);
+                    if(stateCode) states.add(stateCode[0]);
+
+                    // Add to sidebar
+                    const item = document.createElement('div');
+                    item.className = 'alert-item';
+                    item.innerHTML = `<strong>${f.properties.event}</strong><br>${f.properties.areaDesc.split(';')[0]}`;
+                    item.onclick = () => {
+                        const c = f.geometry.coordinates[0][0];
+                        map.flyTo([c[1], c[0]], 10);
+                    };
+                    feed.appendChild(item);
+                });
+            } else {
+                feed.innerHTML = "<p>No active flash flood alerts in the US.</p>";
             }
-            document.getElementById('warn-count').innerText = warns;
-            document.getElementById('watch-count').innerText = watches;
-            document.getElementById('alert-ticker').style.display = warns > 0 ? 'block' : 'none';
-        } catch (e) { console.error("API Sync Failed"); }
+
+            document.getElementById('count-warn').innerText = warnings;
+            document.getElementById('count-states').innerText = states.size;
+            document.getElementById('last-update').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            refreshSec = 60;
+        } catch (e) {
+            console.error("API Error");
+        }
     }
 
+    // Timer Logic
+    setInterval(() => {
+        refreshSec--;
+        if(refreshSec < 0) {
+            getNWSAlerts();
+            refreshSec = 60;
+        }
+        document.getElementById('timer').innerText = `00:${refreshSec < 10 ? '0' : ''}${refreshSec}`;
+    }, 1000);
+
     function searchLoc() {
-        const val = document.getElementById('loc-input').value;
+        const val = document.getElementById('locInput').value;
         if(val) {
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${val}&countrycodes=us`)
             .then(r => r.json()).then(d => { if(d[0]) map.flyTo([d[0].lat, d[0].lon], 11); });
         }
     }
 
-    window.onload = syncData;
-    setInterval(syncData, 300000); // Auto-refresh every 5 minutes
+    window.onload = getNWSAlerts;
 </script>
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Flash Flood Warning Tracker",
-  "url": "https://simobgp.github.io/flash-flood-warning/",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://simobgp.github.io/flash-flood-warning/?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
 </body>
 </html>
