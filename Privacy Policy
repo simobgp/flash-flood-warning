@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | Flash Flood Tracker</title>
+    <style>
+        :root { --danger: #e11d48; --dark: #0f172a; --slate: #f1f5f9; }
+        body { font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; color: #334155; background: var(--slate); padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1 { color: var(--dark); border-bottom: 3px solid var(--danger); padding-bottom: 10px; }
+        h2 { color: var(--dark); margin-top: 30px; font-size: 1.3rem; }
+        p { margin-bottom: 15px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--danger); text-decoration: none; font-weight: bold; }
+        footer { text-align: center; margin-top: 40px; font-size: 0.8rem; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="back-link">← Back to Live Map</a>
+    <h1>Privacy Policy</h1>
+    <p><strong>Last Updated: December 30, 2025</strong></p>
+
+    <p>At <strong>Flash Flood Tracker</strong>, accessible from your GitHub Pages URL, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by our website and how we use it.</p>
+
+    <h2>1. Information We Collect</h2>
+    <p>We do not require user registration. However, we may collect minimal data in the following ways:</p>
+    <ul>
+        <li><strong>Geolocation:</strong> If you use the "Find My Location" feature, your browser processes your coordinates to center the map. We do not store this data on our servers.</li>
+        <li><strong>Log Files:</strong> We follow a standard procedure of using log files which log visitors when they visit websites. This includes IP addresses, browser type, and time stamps.</li>
+    </ul>
+
+    <h2>2. Cookies and Web Beacons</h2>
+    <p>Flash Flood Tracker uses 'cookies' to store information about visitors' preferences and to optimize the user experience by customizing our web page content.</p>
+
+    <h2>3. Google DoubleClick DART Cookie</h2>
+    <p>Google is a third-party vendor on our site. It uses cookies, known as DART cookies, to serve ads to our site visitors based upon their visit to our site and other sites on the internet.</p>
+
+    <h2>4. Advertising Partners</h2>
+    <p>Third-party ad servers or ad networks use technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on Flash Flood Tracker. These are automatically sent to your browser.</p>
+
+    <h2>5. GDPR & CCPA Compliance</h2>
+    <p>We respect your data rights. You have the right to request access to your data, request deletion, or opt-out of data collection via your browser settings.</p>
+
+    <h2>6. Contact Us</h2>
+    <p>If you have questions about this policy, please contact us via our GitHub repository or at contact@flashfloodwarning.net.</p>
+</div>
+
+<footer>
+    &copy; 2025 Flash Flood Tracker | Public Safety Data Portal
+</footer>
+
+</body>
+</html>
